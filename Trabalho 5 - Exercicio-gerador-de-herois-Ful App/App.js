@@ -65,7 +65,6 @@ function HomeScreen({ navigation }) {
   );
 }
 
-// ================= HERO SCREEN =================
 function HeroScreen({ route, navigation }) {
   const { image } = route.params;
 
@@ -116,7 +115,6 @@ function HeroScreen({ route, navigation }) {
   );
 }
 
-// ================= APP =================
 export default function App() {
   return (
     <NavigationContainer>
@@ -128,7 +126,6 @@ export default function App() {
   );
 }
 
-// ================= ESTILOS =================
 const styles = StyleSheet.create({
   container: { 
     flex: 1, 
