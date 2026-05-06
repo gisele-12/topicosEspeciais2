@@ -37,7 +37,6 @@ class _SimuladorInvestimentosState extends State<SimuladorInvestimentos> {
       }
 
       double i = taxaJuros / 100;
-
       // Fórmula de juros compostos com aportes:
       // M = P(1 + i)^n + A[(1 + i)^n - 1] / i
       // Onde:
