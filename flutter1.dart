@@ -14,7 +14,7 @@ class SimuladorInvestimentos extends StatefulWidget {
 }
 
 class _SimuladorInvestimentosState extends State<SimuladorInvestimentos> {
-  // Controladores para os campos de entrada
+ 
   final TextEditingController _valorInicialController = TextEditingController();
   final TextEditingController _aporteMensalController = TextEditingController();
   final TextEditingController _taxaJurosController = TextEditingController();
@@ -24,21 +24,18 @@ class _SimuladorInvestimentosState extends State<SimuladorInvestimentos> {
   bool _mostrarResultado = false; // Controla se o resultado deve ser exibido
   Color _corResultado = Colors.green; // Cor do resultado
 
-  // Função para calcular o montante final com juros compostos e aportes
-  void _calcularInvestimento() {
+ void _calcularInvestimento() {
     try {
       double valorInicial = double.parse(_valorInicialController.text);
       double aporteMensal = double.parse(_aporteMensalController.text);
       double taxaJuros = double.parse(_taxaJurosController.text);
       int periodo = int.parse(_periodoController.text);
 
-      // Validação de entrada
       if (valorInicial < 0 || aporteMensal < 0 || taxaJuros < 0 || periodo <= 0) {
         _mostrarAlerta('Por favor, insira valores válidos e positivos!');
         return;
       }
 
-      // Converter a taxa de juros de percentual para decimal
       double i = taxaJuros / 100;
 
       // Fórmula de juros compostos com aportes:
@@ -61,11 +58,9 @@ class _SimuladorInvestimentosState extends State<SimuladorInvestimentos> {
         montanteFinal = capitalInicial + aportes;
       }
 
-      // Calcular o valor total investido
       double totalInvestido = valorInicial + (aporteMensal * periodo);
 
-      // Determinar a cor do resultado (desafio extra)
-      if (montanteFinal > (totalInvestido * 2)) {
+       if (montanteFinal > (totalInvestido * 2)) {
         _corResultado = const Color(0xFF00B894); // Verde Esmeralda
       } else {
         _corResultado = Colors.green;
@@ -81,14 +76,12 @@ class _SimuladorInvestimentosState extends State<SimuladorInvestimentos> {
     }
   }
 
-  // Função para exibir alertas
   void _mostrarAlerta(String mensagem) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(mensagem)),
     );
   }
 
-  // Função para limpar os campos
   void _limpar() {
     _valorInicialController.clear();
     _aporteMensalController.clear();
@@ -101,7 +94,6 @@ class _SimuladorInvestimentosState extends State<SimuladorInvestimentos> {
     });
   }
 
-  // Widget reutilizável para campo de entrada
   Widget _buildTextField(
     TextEditingController controller,
     String label,
@@ -150,14 +142,13 @@ class _SimuladorInvestimentosState extends State<SimuladorInvestimentos> {
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
-            // Campo: Valor Inicial
+
             _buildTextField(
               _valorInicialController,
               'Valor Inicial (R\$)',
               'Ex: 1000',
             ),
 
-            // Campo: Aporte Mensal
             _buildTextField(
               _aporteMensalController,
               'Aporte Mensal (R\$)',
@@ -171,7 +162,6 @@ class _SimuladorInvestimentosState extends State<SimuladorInvestimentos> {
               'Ex: 1',
             ),
 
-            // Campo: Período em Meses
             _buildTextField(
               _periodoController,
               'Período (Meses)',
@@ -180,7 +170,6 @@ class _SimuladorInvestimentosState extends State<SimuladorInvestimentos> {
 
             const SizedBox(height: 30),
 
-            // Botão de Cálculo
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -205,7 +194,6 @@ class _SimuladorInvestimentosState extends State<SimuladorInvestimentos> {
 
             const SizedBox(height: 20),
 
-            // Botão de Limpeza
             SizedBox(
               width: double.infinity,
               child: OutlinedButton(
@@ -230,7 +218,6 @@ class _SimuladorInvestimentosState extends State<SimuladorInvestimentos> {
 
             const SizedBox(height: 30),
 
-            // Exibição do Resultado
             if (_mostrarResultado)
               Container(
                 padding: const EdgeInsets.all(20.0),
