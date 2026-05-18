@@ -1,0 +1,264 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(MaterialApp(
+    home: TelaInicial(),
+    debugShowCheckedModeBanner: false,
+  ));
+}
+
+// 1ª tela (TelaInicial)
+class TelaInicial extends StatefulWidget {
+  @override
+  _TelaInicialState createState() => _TelaInicialState();
+}
+
+class _TelaInicialState extends State<TelaInicial> {
+  final TextEditingController _nomeController = TextEditingController();
+
+  void _irParaProximaTela() {
+    String nome = _nomeController.text;
+    if (nome.isNotEmpty) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => TelaAtivo(nomeUsuario: nome),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Por favor, digite seu nome.')),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Identificação',
+           style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold), 
+        ),
+        backgroundColor: Colors.purple.shade100, 
+        elevation: 0, 
+        iconTheme: IconThemeData(color: Colors.black87),
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            children: [
+              SizedBox(height: 50),
+              Text(
+                'Bem-vindo ao Simulador Cripto',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 30),
+              TextField(
+                controller: _nomeController,
+                decoration: InputDecoration(
+                  labelText: 'Nome do Investidor',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _irParaProximaTela,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.purple.shade400, 
+                  padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                ),
+                child: Text(
+                  'Próximo',
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// 2ª tela (TelaAtivo)
+class TelaAtivo extends StatefulWidget {
+  final String nomeUsuario;
+
+  TelaAtivo({required this.nomeUsuario});
+
+  @override
+  _TelaAtivoState createState() => _TelaAtivoState();
+}
+
+class _TelaAtivoState extends State<TelaAtivo> {
+  final TextEditingController _ativoController = TextEditingController();
+  final TextEditingController _valorController = TextEditingController();
+
+  void _verComprovante() {
+    String ativo = _ativoController.text;
+    String valor = _valorController.text;
+
+    if (ativo.isNotEmpty && valor.isNotEmpty) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => TelaRecibo(
+            nome: widget.nomeUsuario,
+            cripto: ativo,
+            valor: valor,
+          ),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Preencha o ativo e o valor.')),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Seleção de Ativo'),
+        backgroundColor: Colors.teal,
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(height: 30),
+              Text(
+                'Olá, ${widget.nomeUsuario}, qual ativo deseja comprar?',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 30),
+              TextField(
+                controller: _ativoController,
+                decoration: InputDecoration(
+                  labelText: 'Nome da Criptomoeda (ex: Bitcoin)',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(height: 15),
+              TextField(
+                controller: _valorController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: 'Valor do Investimento (R\$)',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(height: 25),
+              ElevatedButton(
+                onPressed: _verComprovante,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.teal,
+                  padding: EdgeInsets.symmetric(vertical: 15),
+                ),
+                child: Text(
+                  'Ver Comprovante',
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// 3º tela (TelaRecibo)
+class TelaRecibo extends StatelessWidget {
+  final String nome;
+  final String cripto;
+  final String valor;
+
+  TelaRecibo({required this.nome, required this.cripto, required this.valor});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Comprovante'),
+        backgroundColor: Colors.orange.shade800,
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            children: [
+              SizedBox(height: 20),
+              Card(
+                elevation: 4,
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                    children: [
+                      Text(
+                        'Comprovante de Operação',
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.orange.shade900),
+                      ),
+                      Divider(height: 30, thickness: 1.5),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Investidor:', style: TextStyle(fontWeight: FontWeight.bold)),
+                          Text(nome),
+                        ],
+                      ),
+                      SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Ativo:', style: TextStyle(fontWeight: FontWeight.bold)),
+                          Text(cripto),
+                        ],
+                      ),
+                      SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Total:', style: TextStyle(fontWeight: FontWeight.bold)),
+                          Text('R\$ $valor', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(height: 40),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.popUntil(context, (route) => route.isFirst);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  minimumSize: Size(double.infinity, 50),
+                ),
+                child: Text('Confirmar', style: TextStyle(color: Colors.white, fontSize: 16)),
+              ),
+              SizedBox(height: 15),
+              OutlinedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                style: OutlinedButton.styleFrom(
+                  minimumSize: Size(double.infinity, 50),
+                  side: BorderSide(color: Colors.orange.shade800),
+                ),
+                child: Text('Corrigir Ativo', style: TextStyle(color: Colors.orange.shade800, fontSize: 16)),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
