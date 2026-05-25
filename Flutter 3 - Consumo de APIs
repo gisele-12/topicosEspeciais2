@@ -1,0 +1,211 @@
+// Aluno: Gisele Aparecida Roncoleta
+
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+void main() {
+  runApp(const MeuApp());
+}
+
+class MeuApp extends StatelessWidget {
+  const MeuApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Buscador de Países',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: const BuscadorPaises(),
+    );
+  }
+}
+
+class BuscadorPaises extends StatefulWidget {
+  const BuscadorPaises({super.key});
+
+  @override
+  State<BuscadorPaises> createState() => _BuscadorPaisesState();
+}
+
+class _BuscadorPaisesState extends State<BuscadorPaises> {
+  final TextEditingController _paisCtrl = TextEditingController();
+  
+  String _nomePais = "";
+  String _capital = "";
+  String _populacao = "";
+  String _regiao = ""; // Guarda a região (Ex: Americas, Europe, Asia...)
+  String _moeda = "";
+  String _idioma = "";
+  String _emoji = "";
+  bool _carregando = false; 
+
+  // === FUNÇÃO DO BÔNUS: Escolhe a cor da AppBar baseada na região ===
+  Color _pegarCorPorRegiao() {
+    // Se ainda não buscou nenhum país ou deu erro, usa uma cor padrão (cinza ou azul)
+    if (_nomePais.isEmpty || _nomePais.contains('não encontrado') || _nomePais.contains('Erro')) {
+      return Colors.blueGrey;
+    }
+
+    // Passa o texto para minúsculo para evitar problemas com letras maiúsculas
+    String regiaoMinusculo = _regiao.toLowerCase();
+
+    if (regiaoMinusculo.contains('america')) {
+      return Colors.green; // Américas = Verde
+    } else if (regiaoMinusculo.contains('europe')) {
+      return Colors.blue; // Europa = Azul
+    } else if (regiaoMinusculo.contains('asia')) {
+      return Colors.red; // Ásia = Vermelho
+    } else if (regiaoMinusculo.contains('africa')) {
+      return Colors.amber[800]!; // África = Laranja/Âmbar
+    } else if (regiaoMinusculo.contains('oceania')) {
+      return Colors.teal; // Oceania = Azul-turquesa/Teal
+    } else {
+      return Colors.purple; // Caso seja outra região (Antártica, etc)
+    }
+  }
+
+  Future<void> _buscarPais() async {
+    String pais = _paisCtrl.text.trim();
+
+    if (pais.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Digite o nome de um país!')),
+      );
+      return;
+    }
+
+    setState(() {
+      _carregando = true;
+    });
+
+    final url = Uri.parse('https://restcountries.com/v3.1/name/$pais');
+
+    try {
+      final resposta = await http.get(url);
+
+      if (resposta.statusCode == 200) {
+        final lista = jsonDecode(resposta.body) as List;
+        final dados = lista[0]; 
+
+        setState(() {
+          _nomePais = dados['name']['common'] ?? "";
+          
+          _capital = (dados['capital'] != null && (dados['capital'] as List).isNotEmpty)
+              ? dados['capital'][0]
+              : "Não informada";
+              
+          _populacao = dados['population'].toString();
+          
+          // Guardamos a região principal e a sub-região aqui
+          _regiao = '${dados["region"]} (${dados["subregion"]})';
+          _emoji = dados['flags']['emoji'] ?? "";
+
+          if (dados['currencies'] != null) {
+            final moedaMap = dados['currencies'].values.first;
+            _moeda = '${moedaMap["name"]} (${moedaMap["symbol"]})';
+          } else {
+            _moeda = "Não informada";
+          }
+
+          if (dados['languages'] != null) {
+            final idiomas = dados['languages'] as Map;
+            _idioma = idiomas.values.join(', ');
+          } else {
+            _idioma = "Não informado";
+          }
+        });
+      } else {
+        setState(() {
+          _nomePais = 'País não encontrado!';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _nomePais = 'Erro de conexão.';
+      });
+    } finally {
+      setState(() {
+        _carregando = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Buscador de Países'),
+        // AQUI ESTÁ MUDANDO: Ele chama a função do bônus para decidir a cor dinamicamente!
+        backgroundColor: _pegarCorPorRegiao(), 
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextField(
+                controller: _paisCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Nome do país (em inglês)',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 15),
+              
+              ElevatedButton(
+                onPressed: _carregando ? null : _buscarPais,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.all(15),
+                  // O botão de buscar também muda de cor para combinar com o topo!
+                  backgroundColor: _pegarCorPorRegiao(),
+                ),
+                child: _carregando
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                      )
+                    : const Text('BUSCAR', style: TextStyle(color: Colors.white)),
+              ),
+              const SizedBox(height: 25),
+
+              if (_nomePais.isNotEmpty)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    // O fundo do card ganha um tom bem clarinho da cor da região para ficar harmônico
+                    color: _pegarCorPorRegiao().withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: _pegarCorPorRegiao()),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '$_emoji $_nomePais',
+                        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 15), // Bônus extra: espaço entre as linhas pedido no PDF
+                      Text('Capital: $_capital', style: const TextStyle(fontSize: 16)),
+                      const SizedBox(height: 8),
+                      Text('Região: $_regiao', style: const TextStyle(fontSize: 16)),
+                      const SizedBox(height: 8),
+                      Text('População: $_populacao', style: const TextStyle(fontSize: 16)),
+                      const SizedBox(height: 8),
+                      Text('Moeda: $_moeda', style: const TextStyle(fontSize: 16)),
+                      const SizedBox(height: 8),
+                      Text('Idioma(s): $_idioma', style: const TextStyle(fontSize: 16)),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
